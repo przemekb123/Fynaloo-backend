@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .logoutUrl("/api/users/logout")
                         .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
                         .invalidateHttpSession(true)
-                        .deleteCookies("SESSION")
+                        .deleteCookies("JSESSIONID")
                 );
 
         return http.build();
