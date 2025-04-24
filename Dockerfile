@@ -6,7 +6,7 @@ COPY src src
 RUN mvn clean package -DskipTests
 
 # Etap 2: Uruchomienie aplikacji
-FROM eclipse-temurin:21-jdk-slim
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
