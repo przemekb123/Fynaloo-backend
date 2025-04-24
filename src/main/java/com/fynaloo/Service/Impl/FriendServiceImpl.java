@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -77,15 +78,27 @@ public class FriendServiceImpl implements IFriendService {
     @Override
     public List<FriendDTO> listFriends() {
         User currentUser = getCurrentUser();
-        List<Friendship> friendships = friendshipRepository.findAllBySenderOrReceiverAndStatus(currentUser, currentUser, FriendshipStatus.ACCEPTED);
 
-        return friendships.stream()
+        // Pobieramy tylko zaakceptowane znajomości, w których currentUser jest wysyłającym LUB odbierającym
+        List<Friendship> sentAccepted = friendshipRepository.findAllBySenderAndStatus(currentUser, FriendshipStatus.ACCEPTED);
+        List<Friendship> receivedAccepted = friendshipRepository.findAllByReceiverAndStatus(currentUser, FriendshipStatus.ACCEPTED);
+
+        return Stream.concat(sentAccepted.stream(), receivedAccepted.stream())
                 .map(friendship -> {
-                    User friend = friendship.getSender().equals(currentUser) ? friendship.getReceiver() : friendship.getSender();
-                    return friendshipMapper.toFriendDTO(friend);
+                    // Zwracamy drugą osobę w relacji (nie currentUser)
+                    if (friendship.getSender().getId().equals(currentUser.getId())) {
+                        return friendship.getReceiver();
+                    } else {
+                        return friendship.getSender();
+                    }
                 })
+                .distinct() // Unikamy duplikatów
+                .map(friendshipMapper::toFriendDTO)
                 .toList();
     }
+
+
+
 
     @Override
     public List<FriendRequest> listPendingRequests() {
