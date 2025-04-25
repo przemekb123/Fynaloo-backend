@@ -1,15 +1,19 @@
 package com.fynaloo.Controller;
 
-import com.fynaloo.Dto.ApiResponse;
-import com.fynaloo.Dto.LoginRequest;
-import com.fynaloo.Dto.RegistrationRequest;
-import com.fynaloo.Dto.UserDetailsDTO;
+import com.fynaloo.Configuration.CustomUserDetails;
+import com.fynaloo.Dto.*;
+import com.fynaloo.Mapper.UserMapper;
+import com.fynaloo.Service.IJwtService;
 import com.fynaloo.Service.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.filters.ExpiresFilter;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,27 +22,36 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final IUserService userService;
+    private final IJwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+    private final UserMapper userMapper;
+
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody RegistrationRequest request) {
         userService.registerUser(request);
-        ApiResponse response = new ApiResponse("User register Successfully");
-
-        return ResponseEntity.ok(response);
-
+        return ResponseEntity.ok(new ApiResponse("User registered successfully"));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDetailsDTO> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        UserDetailsDTO userDetails = userService.login(request, httpRequest);
-        return ResponseEntity.ok(userDetails);
+    public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginRequest request) {
+        // Autoryzacja loginu
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+        );
 
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails);
+
+        return ResponseEntity.ok(new JwtAuthResponse(token));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDetailsDTO> getCurrentUser() {
-        UserDetailsDTO userDetails = userService.getCurrentUserDTO();
-        return ResponseEntity.ok(userDetails);
+    public ResponseEntity<UserDetailsDTO> getCurrentUser(Authentication authentication) {
+        // Użytkownik już jest wczytany przez JwtAuthenticationFilter
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        UserDetailsDTO dto = userMapper.toUserDetailsDTO(userDetails.getUser());
+        return ResponseEntity.ok(dto);
     }
 
 }

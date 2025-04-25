@@ -8,7 +8,7 @@ import com.fynaloo.Model.Entity.User;
 import com.fynaloo.Model.Enum.FriendshipStatus;
 import com.fynaloo.Repository.FriendshipRepository;
 import com.fynaloo.Repository.UserRepository;
-import com.fynaloo.Security.CustomUserDetails;
+import com.fynaloo.Configuration.CustomUserDetails;
 import com.fynaloo.Service.IFriendService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

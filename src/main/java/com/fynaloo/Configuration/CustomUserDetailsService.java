@@ -1,4 +1,4 @@
-package com.fynaloo.Security;
+package com.fynaloo.Configuration;
 
 import com.fynaloo.Model.Entity.User;
 import com.fynaloo.Repository.UserRepository;

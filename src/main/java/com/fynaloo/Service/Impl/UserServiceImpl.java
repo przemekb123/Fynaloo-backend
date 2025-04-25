@@ -6,7 +6,7 @@ import com.fynaloo.Dto.RegistrationRequest;
 import com.fynaloo.Mapper.UserMapper;
 import com.fynaloo.Model.Entity.User;
 import com.fynaloo.Repository.UserRepository;
-import com.fynaloo.Security.CustomUserDetails;
+import com.fynaloo.Configuration.CustomUserDetails;
 import com.fynaloo.Service.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
