@@ -6,7 +6,7 @@ import com.fynaloo.Dto.UserDetailsDTO;
 import com.fynaloo.Mapper.UserMapper;
 import com.fynaloo.Model.Entity.User;
 import com.fynaloo.Repository.UserRepository;
-import com.fynaloo.Security.CustomUserDetails;
+import com.fynaloo.Configuration.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;

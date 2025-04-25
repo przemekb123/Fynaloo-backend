@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fynaloo.Dto.LoginRequest;
 import com.fynaloo.Dto.RegistrationRequest;
 import com.fynaloo.Dto.UserDetailsDTO;
-import com.fynaloo.Security.SecurityConfigTest;
+import com.fynaloo.Configuration.SecurityConfigTest;
 import com.fynaloo.Service.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
