@@ -39,13 +39,17 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
-            return customUserDetails.getUser();
+            Long userId = customUserDetails.getUser().getId();
+            return userRepository.findByIdWithGroups(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
         }
         throw new IllegalStateException("No authenticated user found");
     }
+
 
     @Override
     public void registerUser(RegistrationRequest request) {

@@ -3,6 +3,7 @@ package com.fynaloo.Controller;
 import com.fynaloo.Configuration.CustomUserDetails;
 import com.fynaloo.Dto.*;
 import com.fynaloo.Mapper.UserMapper;
+import com.fynaloo.Model.Entity.User;
 import com.fynaloo.Service.IJwtService;
 import com.fynaloo.Service.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,9 +49,8 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDetailsDTO> getCurrentUser(Authentication authentication) {
-        // Użytkownik już jest wczytany przez JwtAuthenticationFilter
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        UserDetailsDTO dto = userMapper.toUserDetailsDTO(userDetails.getUser());
+
+        UserDetailsDTO dto = userService.getCurrentUserDTO();
         return ResponseEntity.ok(dto);
     }
 
