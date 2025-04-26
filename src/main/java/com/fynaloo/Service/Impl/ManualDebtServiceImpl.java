@@ -30,17 +30,20 @@ public class ManualDebtServiceImpl implements IManualDebtService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public ManualDebtDetailsDTO addManualDebt(ManualDebtRequest request) {
-        ManualDebt manualDebt = new ManualDebt();
 
-        manualDebt.setDebtor(
-                userRepository.findByUsername(request.getDebtor())
-                        .orElseThrow(() -> new RuntimeException("Debtor not found"))
-        );
-        manualDebt.setCreditor(
-                userRepository.findByUsername(request.getCreditor())
-                        .orElseThrow(() -> new RuntimeException("Creditor not found"))
-        );
+        User debtor = userRepository.findByUsername(request.getDebtor())
+                .orElseThrow(() -> new RuntimeException("Debtor not found"));
+
+        User creditor = userRepository.findByUsername(request.getCreditor())
+                .orElseThrow(() -> new RuntimeException("Creditor not found"));
+
+
+        manualDebtRepository.findDebtBetween(debtor, creditor);
+
+
+        ManualDebt manualDebt = new ManualDebt();
         manualDebt.setAmount(request.getAmount());
         manualDebt.setDescription(request.getDescription());
         manualDebt.setCreatedAt(LocalDateTime.now());

@@ -15,4 +15,6 @@ public interface IFriendService {
     List<FriendDTO> listFriends();
 
     List<FriendRequest> listPendingRequests();
+
+    void removeFriend(Long userId);
 }

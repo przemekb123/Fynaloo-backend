@@ -1,9 +1,6 @@
 package com.fynaloo.Controller;
 
-import com.fynaloo.Dto.FriendAddRequest;
-import com.fynaloo.Dto.FriendDTO;
-import com.fynaloo.Dto.FriendRequest;
-import com.fynaloo.Dto.FriendActionRequest;
+import com.fynaloo.Dto.*;
 import com.fynaloo.Service.IFriendService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +43,11 @@ public class FriendController {
     public ResponseEntity<List<FriendRequest>> listPendingRequests() {
         List<FriendRequest> pendingRequests = friendService.listPendingRequests();
         return ResponseEntity.ok(pendingRequests);
+    }
+
+    @DeleteMapping("/remove")
+    public ResponseEntity<ApiResponse> removeFriend(@RequestBody FriendActionRequest request){
+        friendService.removeFriend(request.getUserId());
+        return ResponseEntity.ok(new ApiResponse("Friend removed successfull "));
     }
 }

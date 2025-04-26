@@ -117,4 +117,28 @@ public class FriendServiceImpl implements IFriendService {
         }
         throw new IllegalStateException("No authenticated user found");
     }
+
+    @Override
+    @Transactional
+    public void removeFriend(Long userId) {
+        User currentUser = getCurrentUser();
+        User deletedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Szukamy wszystkich przyjaźni, gdzie currentUser jest nadawcą i deletedUser odbiorcą
+        Friendship sentFriendship = friendshipRepository.findBySenderAndReceiverAndStatus(currentUser, deletedUser, FriendshipStatus.ACCEPTED)
+                .orElse(null);
+
+        // Szukamy wszystkich przyjaźni, gdzie currentUser jest odbiorcą i deletedUser nadawcą
+        Friendship receivedFriendship = friendshipRepository.findBySenderAndReceiverAndStatus(deletedUser, currentUser, FriendshipStatus.ACCEPTED)
+                .orElse(null);
+
+        if (sentFriendship != null) {
+            friendshipRepository.delete(sentFriendship);
+        }
+
+        if (receivedFriendship != null) {
+            friendshipRepository.delete(receivedFriendship);
+        }
+    }
 }
