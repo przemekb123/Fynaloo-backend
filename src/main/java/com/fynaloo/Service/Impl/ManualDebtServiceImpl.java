@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,25 +33,43 @@ public class ManualDebtServiceImpl implements IManualDebtService {
     @Override
     @Transactional
     public ManualDebtDetailsDTO addManualDebt(ManualDebtRequest request) {
-
         User debtor = userRepository.findByUsername(request.getDebtor())
                 .orElseThrow(() -> new RuntimeException("Debtor not found"));
-
         User creditor = userRepository.findByUsername(request.getCreditor())
                 .orElseThrow(() -> new RuntimeException("Creditor not found"));
 
+        // Szukamy istniejącego długu pomiędzy użytkownikami
+        Optional<ManualDebt> existingDebtOpt = manualDebtRepository.findDebtBetween(debtor, creditor);
 
-        manualDebtRepository.findDebtBetween(debtor, creditor);
+        if (existingDebtOpt.isPresent()) {
+            ManualDebt existingDebt = existingDebtOpt.get();
+            BigDecimal newAmount = existingDebt.getAmount().add(request.getAmount());
 
+            if (newAmount.compareTo(BigDecimal.ZERO) == 0) {
+                // Rozliczenie długu
+                existingDebt.setAmount(BigDecimal.ZERO);
+                existingDebt.setSettled(true);
+            } else {
+                existingDebt.setAmount(newAmount);
+            }
 
-        ManualDebt manualDebt = new ManualDebt();
-        manualDebt.setAmount(request.getAmount());
-        manualDebt.setDescription(request.getDescription());
-        manualDebt.setCreatedAt(LocalDateTime.now());
-        manualDebt.setSettled(false);
-        manualDebtRepository.save(manualDebt);
-        return manualDebtMapper.toManualDebtDetailsDTO(manualDebt);
+            manualDebtRepository.save(existingDebt);
+            return manualDebtMapper.toManualDebtDetailsDTO(existingDebt);
+
+        } else {
+            ManualDebt manualDebt = new ManualDebt();
+            manualDebt.setDebtor(debtor);
+            manualDebt.setCreditor(creditor);
+            manualDebt.setAmount(request.getAmount());
+            manualDebt.setDescription(request.getDescription());
+            manualDebt.setCreatedAt(LocalDateTime.now());
+            manualDebt.setSettled(false);
+
+            manualDebtRepository.save(manualDebt);
+            return manualDebtMapper.toManualDebtDetailsDTO(manualDebt);
+        }
     }
+
 
     @Override
     public List<ManualDebtDetailsDTO> getDebtsForUser(Long userId) {

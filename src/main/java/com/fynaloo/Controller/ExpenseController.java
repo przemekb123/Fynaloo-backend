@@ -1,5 +1,6 @@
 package com.fynaloo.Controller;
 
+import com.fynaloo.Dto.ApiResponse;
 import com.fynaloo.Dto.ExpenseDetailsDTO;
 import com.fynaloo.Dto.ExpenseRequest;
 import com.fynaloo.Service.IExpenseService;
@@ -35,8 +36,8 @@ public class ExpenseController {
     }
 
     @PostMapping("/{expenseId}/settle")
-    public ResponseEntity<String> settleExpense(@PathVariable Long expenseId) {
+    public ResponseEntity<ApiResponse> settleExpense(@PathVariable Long expenseId) {
         expenseService.settleParticipant(expenseId);
-        return ResponseEntity.ok("Debt marked as settled");
+        return ResponseEntity.ok(new ApiResponse("Debt marked as settled"));
     }
 }

@@ -1,15 +1,9 @@
 package com.fynaloo.Controller;
 
-import com.fynaloo.Configuration.CustomUserDetails;
 import com.fynaloo.Dto.*;
-import com.fynaloo.Mapper.UserMapper;
-import com.fynaloo.Model.Entity.User;
 import com.fynaloo.Service.IJwtService;
 import com.fynaloo.Service.IUserService;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.filters.ExpiresFilter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +19,6 @@ public class UserController {
     private final IUserService userService;
     private final IJwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final UserMapper userMapper;
 
 
     @PostMapping("/register")
@@ -48,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDetailsDTO> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserDetailsDTO> getCurrentUser() {
 
         UserDetailsDTO dto = userService.getCurrentUserDTO();
         return ResponseEntity.ok(dto);

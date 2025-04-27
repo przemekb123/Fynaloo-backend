@@ -102,6 +102,7 @@ public class ExpenseServiceImpl implements IExpenseService {
         }
 
         participant.setSettled(true);
+
         expenseParticipantRepository.save(participant);
     }
 }

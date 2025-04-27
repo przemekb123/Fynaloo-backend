@@ -28,9 +28,9 @@ public class ManualDebtController {
     }
 
     @PostMapping("/{debtId}/settle")
-    public ResponseEntity<String> settleManualDebt(@PathVariable Long debtId) {
+    public ResponseEntity<ApiResponse> settleManualDebt(@PathVariable Long debtId) {
         manualDebtService.settleManualDebt(debtId);
-        return ResponseEntity.ok("Debt settled successfully");
+        return ResponseEntity.ok(new ApiResponse("Debt settled successfully"));
     }
 
     @PostMapping("/recalculate")
@@ -42,8 +42,8 @@ public class ManualDebtController {
 
     //adjust price
     @PostMapping("/adjust-price-difference")
-    public ResponseEntity<String> adjustPriceDifference(@RequestBody AdjustPriceDifferenceRequest request) {
+    public ResponseEntity<ApiResponse> adjustPriceDifference(@RequestBody AdjustPriceDifferenceRequest request) {
         manualDebtService.adjustPriceDifference(request);
-        return ResponseEntity.ok("Price difference distributed successfully");
+        return ResponseEntity.ok(new ApiResponse("Price difference distributed successfully"));
     }
 }

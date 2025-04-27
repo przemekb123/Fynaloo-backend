@@ -21,20 +21,15 @@ public class GroupController {
         return ResponseEntity.ok(group);
     }
 
-//    @PostMapping("/{groupId}/add-member")
-//    public ResponseEntity<String> addMemberToGroup(@PathVariable Long groupId, @RequestParam Long userId) {
-//        groupService.addMemberToGroup(groupId, userId);
-//        return ResponseEntity.ok("Member added successfully");
-//    }
 
     @DeleteMapping("/{groupId}/remove-member/{userId}")
-    public ResponseEntity<String> removeMemberFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
+    public ResponseEntity<ApiResponse> removeMemberFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
         groupService.removeMemberFromGroup(groupId, userId);
-        return ResponseEntity.ok("Member removed successfully");
+        return ResponseEntity.ok(new ApiResponse("Member removed successfully"));
     }
 
     @DeleteMapping("/delete/{groupId}")
-    public ResponseEntity<ApiResponse> removeGroup(@PathVariable Long groupId){
+    public ResponseEntity<ApiResponse> removeGroup(@PathVariable Long groupId) {
         groupService.deleteGroup(groupId);
         return ResponseEntity.ok(new ApiResponse("Group removed successfully"));
     }
@@ -79,7 +74,6 @@ public class GroupController {
     public ResponseEntity<List<InvitationDTO>> getPendingInvitations() {
         return ResponseEntity.ok(groupService.listPendingInvitations());
     }
-
 
 
 }
