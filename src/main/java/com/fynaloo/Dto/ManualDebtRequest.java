@@ -14,6 +14,8 @@ public class ManualDebtRequest {
     private String debtor;
     private String creditor;
     private BigDecimal amount;
+    private String currency;
+
     private String description;
 
 }

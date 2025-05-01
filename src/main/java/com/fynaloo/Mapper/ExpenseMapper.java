@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 public interface ExpenseMapper {
 
     @Mapping(source = "paidBy.username", target = "paidBy")
+    @Mapping(source = "paidBy.firstName", target = "firstName")
+    @Mapping(source = "paidBy.lastName", target = "lastName")
     @Mapping(target = "participants", expression = "java(mapUnsettledParticipants(expense.getParticipants()))")
     @Mapping(target = "paidDebts", expression = "java(mapSettledDebts(expense.getParticipants()))")
     ExpenseDetailsDTO toExpenseDetailsDTO(Expense expense);

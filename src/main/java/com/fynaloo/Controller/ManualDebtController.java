@@ -33,12 +33,7 @@ public class ManualDebtController {
         return ResponseEntity.ok(new ApiResponse("Debt settled successfully"));
     }
 
-    @PostMapping("/recalculate")
-    public ResponseEntity<ApiResponse> recalculateDebt(@RequestBody RecalculateDebtRequest request) {
-        manualDebtService.recalculateDebt(request);
 
-        return ResponseEntity.ok(new ApiResponse("Debt recalculated successfully"));
-    }
 
     //adjust price
     @PostMapping("/adjust-price-difference")

@@ -12,6 +12,7 @@ import com.fynaloo.Repository.ExpenseParticipantRepository;
 import com.fynaloo.Repository.ExpenseRepository;
 import com.fynaloo.Repository.GroupRepository;
 import com.fynaloo.Repository.UserRepository;
+import com.fynaloo.Service.IBalanceService;
 import com.fynaloo.Service.IExpenseService;
 import com.fynaloo.Service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class ExpenseServiceImpl implements IExpenseService {
     private final GroupRepository groupRepository;
     private final ExpenseMapper expenseMapper;
     private final IUserService userService;
+    private final IBalanceService balanceService;
     @Override
     public ExpenseDetailsDTO createExpense(ExpenseRequest request) {
         // 1. Stworzenie nowego obiektu Expense
@@ -65,18 +67,19 @@ public class ExpenseServiceImpl implements IExpenseService {
             participant.setSettled(false);
 
             expenseParticipantRepository.save(participant);
+            balanceService.ModifyBalance(participantUser, payer, participantDTO.getShareAmount(), expense.getCurrency());
         }
 
         // 3. Mapowanie z powrotem na DTO
         return expenseMapper.toExpenseDetailsDTO(expense);
     }
 
-        @Override
-        public ExpenseDetailsDTO getExpenseDetails (Long expenseId){
-            Expense expense = expenseRepository.findById(expenseId)
-                    .orElseThrow(() -> new RuntimeException("Expense not found"));
-            return expenseMapper.toExpenseDetailsDTO(expense);
-        }
+    @Override
+    public ExpenseDetailsDTO getExpenseDetails (Long expenseId){
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new RuntimeException("Expense not found"));
+        return expenseMapper.toExpenseDetailsDTO(expense);
+    }
 
     @Override
     public List<ExpenseDetailsDTO> getExpensesForUser(Long userId) {
@@ -104,5 +107,11 @@ public class ExpenseServiceImpl implements IExpenseService {
         participant.setSettled(true);
 
         expenseParticipantRepository.save(participant);
+        balanceService.ModifyBalance(
+                expense.getPaidBy(),
+                currentUser,
+                participant.getShareAmount(),
+                expense.getCurrency()
+        );
     }
 }

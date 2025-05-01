@@ -28,6 +28,8 @@ public class ManualDebt {
 
     @Column(nullable = false)
     private BigDecimal amount;
+    @Column
+    private String currency;
 
     @Column(nullable = false)
     private Boolean settled = false;

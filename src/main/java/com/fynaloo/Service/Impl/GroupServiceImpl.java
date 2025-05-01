@@ -39,6 +39,31 @@ public class GroupServiceImpl implements IGroupService {
     private final IUserService userService;
     private final InvitationRepository invitationRepository;
 
+    protected String generateRandomSuffix(int length) {
+        String chars = "ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder suffix = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int randomIndex = (int) (Math.random() * chars.length());
+            suffix.append(chars.charAt(randomIndex));
+        }
+        return suffix.toString();
+    }
+
+    protected String generateGroupUrl(String groupName) {
+        String groupUrl;
+        do {
+            String baseName = groupName
+                    .toLowerCase()
+                    .replaceAll("\\s+", "-")
+                    .replaceAll("[^a-z0-9-]", "");
+
+            String uniqueSuffix = generateRandomSuffix(10);
+            groupUrl = baseName + "-" + uniqueSuffix;
+        } while (groupRepository.findByGroupUrl(groupUrl).isPresent());
+
+        return groupUrl;
+    }
+
     @Override
     public GroupDetailsDTO createGroup(CreateGroupRequest request) {
         User creator = userRepository.findById(request.getCreatorId())
@@ -61,6 +86,7 @@ public class GroupServiceImpl implements IGroupService {
 
         return groupMapper.toGroupDTO(group);
     }
+
 
     @Override
     public void addMemberToGroup(Long groupId, String username) {
@@ -110,9 +136,6 @@ public class GroupServiceImpl implements IGroupService {
         return groupMapper.toGroupDTO(group);
     }
 
-    private String generateGroupUrl(String groupName) {
-        return groupName.toLowerCase().replaceAll("\\s+", "-") + "-" + System.currentTimeMillis();
-    }
 
     @Override
     @Transactional
@@ -181,6 +204,7 @@ public class GroupServiceImpl implements IGroupService {
         invitation.setStatus(InvitationStatus.REJECTED);
         invitationRepository.save(invitation);
     }
+
     @Override
     public void joinGroupViaLink(String groupUrl) {
         Long currentUserId = userService.getCurrentUser().getId();

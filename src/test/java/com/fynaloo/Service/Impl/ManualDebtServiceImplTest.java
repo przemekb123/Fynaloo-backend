@@ -138,7 +138,6 @@ class ManualDebtServiceImplTest {
 
         RecalculateDebtRequest request = new RecalculateDebtRequest(1L, 2L, BigDecimal.ZERO);
 
-        manualDebtService.recalculateDebt(request);
 
         verify(manualDebtRepository, atLeastOnce()).save(any(ManualDebt.class));
     }

@@ -10,5 +10,7 @@ public interface ManualDebtMapper {
 
     @Mapping(source = "debtor.username", target = "debtor")
     @Mapping(source = "creditor.username", target = "creditor")
+    @Mapping(source = "creditor.firstName", target = "creditorFirstName")
+    @Mapping(source = "creditor.lastName", target = "creditorLastName")
     ManualDebtDetailsDTO toManualDebtDetailsDTO(ManualDebt manualDebt);
 }

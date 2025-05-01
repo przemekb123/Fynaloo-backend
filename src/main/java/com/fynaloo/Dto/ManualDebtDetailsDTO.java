@@ -15,7 +15,11 @@ public class ManualDebtDetailsDTO {
     private Long id;
     private String debtor;
     private String creditor;
+    private String creditorFirstName;
+    private String creditorLastName;
     private BigDecimal amount;
+    private String currency;
+
     private Boolean settled;
     private LocalDateTime createdAt;
     private String description;

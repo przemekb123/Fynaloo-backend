@@ -15,6 +15,8 @@ public class ExpenseDetailsDTO {
     private String description; // Opis wydatku
     private BigDecimal amount; // Kwota wydatku
     private String paidBy; // Username osoby, która zapłaciła
+    private String firstName;
+    private String lastName;
     private String currency;
 
     private Set<ParticipantInfoDTO> participants;

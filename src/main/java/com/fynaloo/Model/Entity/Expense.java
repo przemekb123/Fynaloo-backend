@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +39,8 @@ public class Expense {
 
     @OneToMany(mappedBy = "expense")
     private Set<ExpenseParticipant> participants;
+    @Column
+    private LocalDateTime createdAt = LocalDateTime.now();
 
 //    @OneToMany(mappedBy = "expense")
 //    private List<ExpenseComment> comments;

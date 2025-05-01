@@ -9,6 +9,7 @@ import com.fynaloo.Model.Entity.ManualDebt;
 import com.fynaloo.Model.Entity.User;
 import com.fynaloo.Repository.ManualDebtRepository;
 import com.fynaloo.Repository.UserRepository;
+import com.fynaloo.Service.IBalanceService;
 import com.fynaloo.Service.IManualDebtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class ManualDebtServiceImpl implements IManualDebtService {
     private final ManualDebtRepository manualDebtRepository;
     private final ManualDebtMapper manualDebtMapper;
     private final UserRepository userRepository;
+    private final IBalanceService balanceService;
 
     @Override
     @Transactional
@@ -38,25 +40,6 @@ public class ManualDebtServiceImpl implements IManualDebtService {
         User creditor = userRepository.findByUsername(request.getCreditor())
                 .orElseThrow(() -> new RuntimeException("Creditor not found"));
 
-        // Szukamy istniejącego długu pomiędzy użytkownikami
-        Optional<ManualDebt> existingDebtOpt = manualDebtRepository.findDebtBetween(debtor, creditor);
-
-        if (existingDebtOpt.isPresent()) {
-            ManualDebt existingDebt = existingDebtOpt.get();
-            BigDecimal newAmount = existingDebt.getAmount().add(request.getAmount());
-
-            if (newAmount.compareTo(BigDecimal.ZERO) == 0) {
-                // Rozliczenie długu
-                existingDebt.setAmount(BigDecimal.ZERO);
-                existingDebt.setSettled(true);
-            } else {
-                existingDebt.setAmount(newAmount);
-            }
-
-            manualDebtRepository.save(existingDebt);
-            return manualDebtMapper.toManualDebtDetailsDTO(existingDebt);
-
-        } else {
             ManualDebt manualDebt = new ManualDebt();
             manualDebt.setDebtor(debtor);
             manualDebt.setCreditor(creditor);
@@ -66,8 +49,10 @@ public class ManualDebtServiceImpl implements IManualDebtService {
             manualDebt.setSettled(false);
 
             manualDebtRepository.save(manualDebt);
-            return manualDebtMapper.toManualDebtDetailsDTO(manualDebt);
-        }
+            balanceService.ModifyBalance(debtor, creditor, request.getAmount(), request.getCurrency());
+
+        return manualDebtMapper.toManualDebtDetailsDTO(manualDebt);
+
     }
 
 
@@ -85,62 +70,15 @@ public class ManualDebtServiceImpl implements IManualDebtService {
                 .orElseThrow(() -> new RuntimeException("Debt not found"));
         debt.setSettled(true);
         manualDebtRepository.save(debt);
+        balanceService.ModifyBalance(
+                debt.getCreditor(),
+                debt.getDebtor(),
+                debt.getAmount(),
+                debt.getCurrency()
+        );
     }
 
-    @Override
-    public void recalculateDebt(RecalculateDebtRequest request) {
-        Long debtorId = request.getDebtorId();
-        Long creditorId = request.getCreditorId();
-        BigDecimal newAmount = request.getAmount();
 
-        // Szukamy istniejącego długu w obie strony
-        List<ManualDebt> debtorDebts = manualDebtRepository.findByDebtorIdAndCreditorId(debtorId, creditorId);
-        List<ManualDebt> creditorDebts = manualDebtRepository.findByDebtorIdAndCreditorId(creditorId, debtorId);
-
-        BigDecimal debtorTotal = debtorDebts.stream()
-                .filter(debt -> !debt.getSettled())
-                .map(ManualDebt::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal creditorTotal = creditorDebts.stream()
-                .filter(debt -> !debt.getSettled())
-                .map(ManualDebt::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal result = debtorTotal.subtract(creditorTotal).add(newAmount);
-
-        // Usuwamy stare długi (lub oznaczamy jako spłacone)
-        debtorDebts.forEach(debt -> {
-            debt.setSettled(true);
-            manualDebtRepository.save(debt);
-        });
-        creditorDebts.forEach(debt -> {
-            debt.setSettled(true);
-            manualDebtRepository.save(debt);
-        });
-
-        if (result.compareTo(BigDecimal.ZERO) > 0) {
-            // Debtor nadal jest winny creditorowi
-            ManualDebt newDebt = new ManualDebt();
-            newDebt.setDebtor(userRepository.findById(debtorId).orElseThrow(() -> new RuntimeException("Debtor not found")));
-            newDebt.setCreditor(userRepository.findById(creditorId).orElseThrow(() -> new RuntimeException("Creditor not found")));
-            newDebt.setAmount(result);
-            newDebt.setCreatedAt(LocalDateTime.now());
-            newDebt.setSettled(false);
-            manualDebtRepository.save(newDebt);
-        } else if (result.compareTo(BigDecimal.ZERO) < 0) {
-            // Creditor jest teraz winny debtorowi
-            ManualDebt newDebt = new ManualDebt();
-            newDebt.setDebtor(userRepository.findById(creditorId).orElseThrow(() -> new RuntimeException("Creditor not found")));
-            newDebt.setCreditor(userRepository.findById(debtorId).orElseThrow(() -> new RuntimeException("Debtor not found")));
-            newDebt.setAmount(result.abs());
-            newDebt.setCreatedAt(LocalDateTime.now());
-            newDebt.setSettled(false);
-            manualDebtRepository.save(newDebt);
-        }
-        // Jeśli zero - nie tworzymy nowego długu
-
-    }
 
     @Override
     public void adjustPriceDifference(AdjustPriceDifferenceRequest request) {

@@ -21,4 +21,7 @@ public interface ManualDebtRepository extends JpaRepository<ManualDebt, Long> {
                 OR (d.debtor = :creditor AND d.creditor = :debtor))
             """)
     Optional<ManualDebt> findDebtBetween(@Param("debtor") User debtor, @Param("creditor") User creditor);
+
+
+
 }

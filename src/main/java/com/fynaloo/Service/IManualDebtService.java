@@ -11,6 +11,5 @@ public interface IManualDebtService {
     ManualDebtDetailsDTO addManualDebt(ManualDebtRequest request);
     List<ManualDebtDetailsDTO> getDebtsForUser(Long userId);
     void settleManualDebt(Long debtId);
-    void recalculateDebt(RecalculateDebtRequest request);
     void adjustPriceDifference(AdjustPriceDifferenceRequest request);
 }
